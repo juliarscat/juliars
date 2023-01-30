@@ -1,4 +1,4 @@
-
+//Sample code for a network scanner to scan a host and a port range then export the data as a CSV
 using System;
 using System.Windows.Forms;
 using System.IO;
