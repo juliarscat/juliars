@@ -1,3 +1,5 @@
+//Code you can add to your project and manipulate to get the data from a bluetooth device to move your arduino robot.
+
 #include <SoftwareSerial.h>
 
 SoftwareSerial BTSerial(10, 11); // RX | TX
