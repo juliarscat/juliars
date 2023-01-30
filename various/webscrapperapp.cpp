@@ -1,4 +1,4 @@
-//Sample code to create a web scraper
+//Sample code to create a web scraper and export data as a csv
 using System;
 using System.Windows.Forms;
 using System.Net;
