@@ -1,4 +1,4 @@
-
+// Mouse mover app that moves the moves randomly for X minutes, perfect for teleworking controlled workers
 
 using System;
 using System.Windows.Forms;
