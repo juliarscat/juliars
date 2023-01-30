@@ -1,3 +1,4 @@
+    # Simple code to grab data from bluetooth headset (neurosky mobile 2) to move the mouse cursor
 import pyautogui
 import numpy as np
 import bluetooth
