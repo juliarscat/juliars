@@ -1,5 +1,5 @@
 
-             
+             //#sample code in C# to retrieve data from the NeuroSky Mobile 2
 using System;
 using System.IO.Ports;
 
