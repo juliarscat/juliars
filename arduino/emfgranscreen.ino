@@ -1,5 +1,5 @@
 # Sample code to create a simple EMF detector with arduino, some leds and some pins
-include "U8glib.h"
+#include "U8glib.h"
 U8GLIB_SSD1306_128X64 u8g(U8G_I2C_OPT_NONE|U8G_I2C_OPT_DEV_0);
 
 #define NUMREADINGS 15
