@@ -1,3 +1,5 @@
+'Imports data from a CSV, creates a sheet for every CSV, then add the name of the file to an index with the date and time of the data added, then creates an hyperlink for every file'
+
 Sub ImportCSVFiles()
 Dim folderPath As String
 Dim fileName As String
