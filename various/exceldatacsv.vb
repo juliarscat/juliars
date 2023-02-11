@@ -65,8 +65,12 @@ NextFile:
     'Move to the next file
     fileName = Dir()
 
+
+
 Loop
+
 End Sub
+
 
 
 
