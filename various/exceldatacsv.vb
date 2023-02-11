@@ -1,106 +1,71 @@
 'Imports data from a CSV, creates a sheet for every CSV, then add the name of the file to an index with the date and time of the data added, then creates an hyperlink for every file'
 
-Private Function IsInCollection(col As Collection, item As Variant) As Boolean
-    On Error Resume Next
-    IsInCollection = Not IsError(col.item(item))
-    On Error GoTo 0
-End Function
-
 Sub ImportCSVFiles()
 Dim folderPath As String
 Dim fileName As String
 Dim ws As Worksheet
 Dim indexSheet As Worksheet
 Dim lastRow As Long
-Dim importedFiles As Collection
+Dim wb As Workbook
 
-' Set the folder path where the CSV files are located
-folderPath = "C:\CSVFiles"
 
-' Create a collection to store the names of the imported files
-Set importedFiles = New Collection
+'Set the folder path where the CSV files are located
+folderPath = "C:\CSVFiles\"
 
-' Check if the index sheet already exists, if not, create it
+'Check if the index sheet already exists, if not, create it
 On Error Resume Next
 Set indexSheet = ThisWorkbook.Sheets("Index")
 On Error GoTo 0
 If indexSheet Is Nothing Then
-Set indexSheet = ThisWorkbook.Sheets.Add
-indexSheet.Name = "Index"
-indexSheet.Range("A1").value = "File Name"
-indexSheet.Range("B1").value = "Date Imported"
+    Set indexSheet = ThisWorkbook.Sheets.Add
+    indexSheet.Name = "Index"
 End If
 
 'Loop through all the files in the folder
 fileName = Dir(folderPath & "*.csv")
 Do While fileName <> ""
-' Check if the file has already been imported
-If Not IsInCollection(importedFiles, fileName) Then
 
- 'Check if the sheet already exists, if not, create it
-On Error Resume Next
-Set ws = ThisWorkbook.Sheets(Replace(fileName, ".csv", ""))
-On Error GoTo 0
-If ws Is Nothing Then
-    'Import the data from the CSV file into a new sheet
-    Set wb = Workbooks.Open(folderPath & fileName)
-    wb.Sheets(1).Copy After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
-    wb.Close False
-    Set ws = ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
-    ws.Name = Replace(fileName, ".csv", "")
-End If
+    'Check if the sheet already exists, if not, create it
+    On Error Resume Next
+    Set ws = ThisWorkbook.Sheets(Replace(fileName, ".csv", ""))
+    On Error GoTo 0
+    If ws Is Nothing Then
+    
+        'Import the data from the CSV file into a new sheet
+        On Error Resume Next
+        Set wb = Workbooks.Open(folderPath & fileName, ReadOnly:=True)
+        If Err.Number = 0 Then
+            wb.Sheets(1).Copy After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
+            wb.Close False
+            Set ws = ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
+            ws.Name = Replace(fileName, ".csv", "")
+            ws.Range("A1").CurrentRegion.TextToColumns Destination:=ws.Range("A1"), DataType:=xlDelimited, _
+    TextQualifier:=xlDoubleQuote, ConsecutiveDelimiter:=False, Tab:=False, _
+    Semicolon:=True, Comma:=True, Space:=False, Other:=False, FieldInfo:=Array(Array(1, 1), Array(2, 1))
+        Else
+            MsgBox "Error opening file: " & fileName & ". Error code: " & Err.Number
+        End If
+        On Error GoTo 0
+    End If
+    
+    'Add the date and time the file was imported to the index sheet
+    If Not IsError(Application.Match(Replace(fileName, ".csv", ""), indexSheet.Range("A:A"), 0)) Then
+    
+        'File name already exists in the index sheet, skip adding a new entry
+        GoTo NextFile
+    End If
 
+    lastRow = indexSheet.Cells(indexSheet.Rows.Count, "A").End(xlUp).Row + 1
+    indexSheet.Cells(lastRow, "A").value = Replace(fileName, ".csv", "")
+    indexSheet.Cells(lastRow, "B").value = Format(Now, "yyyy-MM-dd hh:mm:ss")
+    indexSheet.Hyperlinks.Add Anchor:=indexSheet.Cells(lastRow, "A"), Address:="", SubAddress:= _
+        ws.Name & "!A1", TextToDisplay:=Replace(fileName, ".csv", "")
 
-    ' Import the data from the CSV file into a new sheet
-    With ActiveSheet.QueryTables.Add(Connection:="TEXT;" & folderPath & fileName, Destination:=Range("A1"))
-        .Name = Replace(fileName, ".csv", "")
-        .FieldNames = True
-        .RowNumbers = False
-        .FillAdjacentFormulas = False
-        .PreserveFormatting = True
-        .RefreshOnFileOpen = False
-        .RefreshStyle = xlInsertDeleteCells
-        .SavePassword = False
-        .SaveData = True
-        .AdjustColumnWidth = True
-        .RefreshPeriod = 0
-        .TextFilePromptOnRefresh = False
-        .TextFilePlatform = 437
-        .TextFileStartRow = 1
-        .TextFileParseType = xlDelimited
-        .TextFileTextQualifier = xlTextQualifierDoubleQuote
-        .TextFileConsecutiveDelimiter = False
-        .TextFileTabDelimiter = False
-        .TextFileSemicolonDelimiter = True
-        .TextFileCommaDelimiter = True
-        .TextFileSpaceDelimiter = False
-        .TextFileSpaceDelimiter = False
-.TextFileColumnDataTypes = Array(1, 1, 1, 1, 1, 1)
-.TextFileTrailingMinusNumbers = True
-.Refresh BackgroundQuery:=False
-End With
-
-' Rename the new sheet to the name of the CSV file
-Set ws = ActiveSheet
-ws.Name = Replace(fileName, ".csv", "")
-
-' Add the file name to the collection of imported files
-importedFiles.Add fileName
-
-' Add the date and time the file was imported to the index sheet
-lastRow = indexSheet.Cells(indexSheet.Rows.Count, "A").End(xlUp).Row + 1
-indexSheet.Cells(lastRow, "A").value = Replace(fileName, ".csv", "")
-indexSheet.Cells(lastRow, "B").value = Format(Now, "yyyy-MM-dd hh:mm:ss")
-
-' Add a hyperlink to the newly created sheet in the index sheet
-indexSheet.Hyperlinks.Add Anchor:=indexSheet.Cells(lastRow, "A"), Address:="", SubAddress:= _
-ws.Name & "!A1", TextToDisplay:=Replace(fileName, ".csv", "")
-
-' Move to the next file
-fileName = Dir()
+NextFile:
+    'Move to the next file
+    fileName = Dir()
 
 Loop
-
 End Sub
 
 
