@@ -1,4 +1,4 @@
-'Imports data from a CSV, creates a sheet for every CSV, then add the name of the file to an index with the date and time of the data added, then creates an hyperlink for every file'
+'Imports data from a CSV, creates a sheet for every CSV, then add the name of the file to an index with the date and time of the data added, then creates an hyperlink for every file, it moves the file to a subfolder'
 
 Sub ImportCSVFiles()
 Dim folderPath As String
@@ -37,6 +37,8 @@ Do While fileName <> ""
         If Err.Number = 0 Then
             wb.Sheets(1).Copy After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
             wb.Close False
+            FileSystem.FileCopy folderPath & fileName, "C:\CSVFiles\read\" & fileName
+FileSystem.Kill folderPath & fileName
             Set ws = ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count)
             ws.Name = Replace(fileName, ".csv", "")
             ws.Range("A1").CurrentRegion.TextToColumns Destination:=ws.Range("A1"), DataType:=xlDelimited, _
@@ -70,6 +72,7 @@ NextFile:
 Loop
 
 End Sub
+
 
 
 
